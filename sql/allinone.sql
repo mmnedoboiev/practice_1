@@ -35,3 +35,15 @@ INSERT INTO "tbl_users" ("id", "username", "email", "join_date", "password", "ad
 	(5, 'test2', NULL, NULL, 'test2', 'шевченка', '', 'Україна', 'область', '0971111111', 'first', 'last'),
 	(1, 'work', '@gmail.com', '2024-02-26', 'test', 'шевченка', '', 'Україна', 'область', '0971111111', 'first', 'last');
 /*!40000 ALTER TABLE "tbl_users" ENABLE KEYS */;
+
+
+
+CREATE TABLE tbl_privilege (
+    id SERIAL PRIMARY KEY,
+    type VARCHAR(20),
+    description VARCHAR(50)
+);
+INSERT INTO "public"."tbl_privilege" ("type", "description") VALUES ('користувач', 'звичайна роль');
+SELECT "id", "type", "description" FROM "public"."tbl_privilege" WHERE  "id"=nextval('tbl_privilege_id_seq'::regclass);
+INSERT INTO "public"."tbl_privilege" ("type", "description") VALUES ('адміністратор', 'розширена роль');
+SELECT "id", "type", "description" FROM "public"."tbl_privilege" WHERE  "id"=nextval('tbl_privilege_id_seq'::regclass);
