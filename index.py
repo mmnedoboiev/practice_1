@@ -135,6 +135,32 @@ def register():
     else:
         return render_template('home.html')
 
+
+# @app.route('/restore', methods=['GET', 'POST'])
+# def restoreAccount():
+#     if 'username' not in session:
+#         if request.method == 'POST':
+#             username = request.form['username']
+#             pwd = request.form['password']
+#             conn = connect_to_db()
+#             cur = conn.cursor()
+
+#             cur.execute("UPDATE tbl_users SET is_deleted = 0 WHERE username = %s and password = %s", (username, pwd))
+#             conn.commit()
+
+#             if cur.rowcount > 0:
+#                 return redirect(url_for('login'))
+#             else:
+#                 return render_template('restore.html', error='Failed to restore account.')
+#             cur.close()
+#             conn.close()
+#         return redirect(url_for('logout'))  # Перенаправлення на сторінку виходу
+#     else:
+#         return render_template('login.html', error='You must be logged in to restore your account.')
+
+
+
+
 #завершення сесії
 @app.route('/logout')
 def logout():
