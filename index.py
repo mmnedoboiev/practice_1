@@ -40,7 +40,8 @@ def home():
                                education=user_data[4],country=user_data[5],state=user_data[6],phone=user_data[7],lastname=user_data[8],firstname=user_data[9])   # Передаємо дані користувача у шаблон
     return render_template('home.html')
 
-@app.route('/insert',methods=['GET', 'POST'])
+#Оновлення інформації на формі користувача
+@app.route('/update',methods=['GET', 'POST'])
 def updateInfo():
     if 'username' in session:
         if request.method == 'POST':
@@ -56,7 +57,7 @@ def updateInfo():
             country = request.form['country']
             state = request.form['state']
         # Виконуємо запит UPDATE для оновлення інформації користувача
-            cur.execute("UPDATE tbl_users SET lastname = %s, firstname = %s, phone = %s, address = %s, education = %s, country = %s, state = %s WHERE username = %s",
+            cur.execute("UPDATE tbl_users SET lastname = %s, firstname = %s, phone = %s, address = %s, education = %s, country = %s, state = %s WHERE id = %s",
                     (lastname, firstname, phone, address, education, country, state, user_id))
             conn.commit()
             cur.close()
@@ -64,30 +65,48 @@ def updateInfo():
             return redirect(url_for('home'))
     return render_template('login.html', error='You must be logged in to update your information.')
 
+
+@app.route('/delete', methods=['GET', 'POST'])
+def deleteInfo():
+    if 'username' in session:
+        conn = connect_to_db()
+        cur = conn.cursor()
+        user_id = session['id']
+        # Виконуємо запит DELETE для видалення інформації користувача
+        cur.execute("DELETE FROM tbl_users WHERE id = %s", (user_id,))
+        conn.commit()
+        cur.close()
+        conn.close()
+        return redirect(url_for('logout'))
+    else:
+        return render_template('login.html', error='You must be logged in to delete your information.')
+
+
 #директорія для логіну
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    conn = connect_to_db()
     if 'username' not in session:
         if request.method == 'POST':
             username = request.form['username']
             pwd = request.form['password']
 
+            conn = connect_to_db()
             cur = conn.cursor()
-            cur.execute("SELECT username, password FROM tbl_users WHERE username = %s", (username,))
+            cur.execute("SELECT id, username, password FROM tbl_users WHERE username = %s", (username,))
             user = cur.fetchone()
             cur.close()
 
-            if user and pwd == user[1]:
-                session['username'] = user[0]
+            if user and pwd == user[2]:
+                session['username'] = user[1]
                 session['id'] = user[0]
                 return redirect(url_for('home'))
             else:
                 return render_template('login.html', error='Invalid username or password')
+
         return render_template('login.html')
     else:
         return redirect(url_for('home'))
-
+    
 #директорія для реєстрації
 @app.route('/register',methods=['GET', 'POST'])
 def register():
