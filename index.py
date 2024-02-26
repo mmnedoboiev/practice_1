@@ -73,7 +73,7 @@ def deleteInfo():
         cur = conn.cursor()
         user_id = session['id']
         # Виконуємо запит DELETE для видалення інформації користувача
-        cur.execute("DELETE FROM tbl_users WHERE id = %s", (user_id,))
+        cur.execute("UPDATE tbl_users SET is_deleted = 1 WHERE id = %s", (user_id,))
         conn.commit()
         cur.close()
         conn.close()
@@ -92,7 +92,7 @@ def login():
 
             conn = connect_to_db()
             cur = conn.cursor()
-            cur.execute("SELECT id, username, password FROM tbl_users WHERE username = %s", (username,))
+            cur.execute("SELECT id, username, password FROM tbl_users WHERE username = %s and is_deleted != 1", (username,))
             user = cur.fetchone()
             cur.close()
 
@@ -125,7 +125,7 @@ def register():
             cur.close()
             if user is None:
                 cur = conn.cursor()
-                cur.execute(f"INSERT INTO tbl_users (username, password, join_date) VALUES ('{username}', '{pwd}', '{current_date}')")
+                cur.execute(f"INSERT INTO tbl_users (username, password, join_date,is_deleted) VALUES ('{username}', '{pwd}', '{current_date}',0)")
                 conn.commit()
                 cur.close()
             else:
