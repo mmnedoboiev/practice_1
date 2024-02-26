@@ -1,12 +1,18 @@
-from flask import Flask, render_template, request, redirect, url_for, session,g
+from flask import Flask, render_template, request, redirect, url_for, session,g,app
 import psycopg2
 import os
-from datetime import datetime
+from datetime import datetime,timedelta
 
 app = Flask(__name__,static_url_path="/static")
 
 #значення використовується для захисту від зміни даних сесії користувача з боку клієнта
 app.secret_key = os.urandom(24) 
+
+#час сесії
+@app.before_request
+def make_session_permanent():
+    session.permanent = True
+    app.permanent_session_lifetime = timedelta(minutes=10)
 
 #Конект до бази та використання flask об'єкта G. він викор. для зберігання глоб. змінних протягом одного запиту. + безпека
 def connect_to_db():
