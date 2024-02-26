@@ -72,14 +72,14 @@ def updateInfo():
             if education is not None:
                 cur.execute("UPDATE tbl_users SET education  = %s WHERE id = %s",
                     (education, user_id)) 
-                
+              
             if country is not None and state is not None:
                 cur.execute("UPDATE tbl_users SET country  = %s, state = %s WHERE id = %s",
-                    (country,state, user_id)) 
-                
-                conn.commit()
-                cur.close()
-                conn.close()              
+                    (country,state, user_id))           
+            
+            conn.commit()
+            cur.close()
+            conn.close()              
             return redirect(url_for('home'))
     return render_template('login.html', error='You must be logged in to update your information.')
 
