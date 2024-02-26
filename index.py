@@ -57,11 +57,29 @@ def updateInfo():
             country = request.form['country']
             state = request.form['state']
         # Виконуємо запит UPDATE для оновлення інформації користувача
-            cur.execute("UPDATE tbl_users SET lastname = %s, firstname = %s, phone = %s, address = %s, education = %s, country = %s, state = %s WHERE id = %s",
-                    (lastname, firstname, phone, address, education, country, state, user_id))
-            conn.commit()
-            cur.close()
-            conn.close()
+            if lastname is not None and firstname is not None:
+                cur.execute("UPDATE tbl_users SET lastname = %s, firstname = %s WHERE id = %s",
+                    (lastname, firstname,user_id))
+                
+            if phone is not None:
+                cur.execute("UPDATE tbl_users SET phone = %s WHERE id = %s",
+                    (phone, user_id))   
+
+            if address is not None:
+                cur.execute("UPDATE tbl_users SET address = %s WHERE id = %s",
+                    (address, user_id)) 
+
+            if education is not None:
+                cur.execute("UPDATE tbl_users SET education  = %s WHERE id = %s",
+                    (education, user_id)) 
+                
+            if country is not None and state is not None:
+                cur.execute("UPDATE tbl_users SET country  = %s, state = %s WHERE id = %s",
+                    (country,state, user_id)) 
+                
+                conn.commit()
+                cur.close()
+                conn.close()              
             return redirect(url_for('home'))
     return render_template('login.html', error='You must be logged in to update your information.')
 
@@ -102,7 +120,6 @@ def login():
                 return redirect(url_for('home'))
             else:
                 return render_template('login.html', error='Invalid username or password')
-
         return render_template('login.html')
     else:
         return redirect(url_for('home'))
@@ -120,6 +137,7 @@ def register():
             pwd = request.form['password']
 
             cur = conn.cursor()
+            #Перевірка на існування логіна в БД
             cur.execute("SELECT username FROM tbl_users WHERE username = %s", (username,))
             user = cur.fetchone()
             cur.close()
