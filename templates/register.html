@@ -12,6 +12,9 @@
             <div class="form-container">
                 <img src="https://raw.githubusercontent.com/hicodersofficial/glassmorphism-login-form/master/assets/illustration.png" alt="illustration" class="illustration" />
                 <h1 class="opacity">Register</h1>
+                {% if error %}
+                <p style="color: red;">{{ error }}</p>
+                {% endif %}
                 <form method="POST" action="/register">
                     <input type="text" id="username" name="username" required>
                     <input type="text" id="password" name="password" required>

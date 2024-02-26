@@ -120,11 +120,16 @@ def register():
             pwd = request.form['password']
 
             cur = conn.cursor()
-            cur.execute(f"INSERT INTO tbl_users (username, password, join_date) VALUES ('{username}', '{pwd}', '{current_date}')")
-            conn.commit()
-
+            cur.execute("SELECT username FROM tbl_users WHERE username = %s", (username,))
+            user = cur.fetchone()
             cur.close()
-
+            if user is None:
+                cur = conn.cursor()
+                cur.execute(f"INSERT INTO tbl_users (username, password, join_date) VALUES ('{username}', '{pwd}', '{current_date}')")
+                conn.commit()
+                cur.close()
+            else:
+                return render_template('register.html', error='User exist')
             return redirect(url_for('login'))
         return render_template('register.html')
     else:
