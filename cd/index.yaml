@@ -1,0 +1,44 @@
+---
+- hosts: all
+  gather_facts: yes
+  vars:
+    tmp_files_path: '/app/tmp/files'
+  
+  tasks:
+  - name: MkDir outside project
+    file:
+      path: /app/tmp/files/
+      state: directory
+      mode: '0777'
+    tags:
+    - mkdir
+  
+  - name: Send File
+    copy:
+      src: "{{ item }}"
+      dest: "{{ tmp_files_path }}"
+    with_fileglob:
+      - "/*" #{{ dirwithfile }}
+    tags:
+    - sendfile
+  
+  - name: Copy files outside project
+    shell: cp -r {{ tmp_files_path }} {{ senddirfile }}  # senddirfile -- survey!! /app/
+    tags:
+    - outsidefile
+  
+  - name: File files
+    find:
+      paths: "{{ senddirfile }}" #"{{ tmp_files_path }}"
+      #patterns: "*.cer,cacerts"
+      age: -1d
+      recurse: yes
+    tags:
+    - findfiles
+  
+  - name: Delete old files
+    file:
+      path: "{{ tmp_files_path }}"
+      state: absent
+    tags:
+    - deletefile
