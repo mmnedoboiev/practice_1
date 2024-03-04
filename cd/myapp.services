@@ -1,0 +1,15 @@
+[Unit]
+Description=AppFlask
+After=network.target
+
+[Service]
+WorkingDirectory=/app
+Environment="PATH=/app/environment/bin"
+ExecStart=/bin/bash -c 'source /app/environment/bin/activate && python /app/index.py'
+ExecReload=/bin/kill -s HUP $MAINPID
+KillMode=process
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target
