@@ -11,6 +11,7 @@ CREATE TABLE "tbl_users" (
 	"phone" VARCHAR(24) NULL DEFAULT NULL,
 	"lastname" VARCHAR(40) NULL DEFAULT NULL,
 	"firstname" VARCHAR(40) NULL DEFAULT NULL,
+	"is_deleted" INTEGER NULL DEFAULT NULL,
 	PRIMARY KEY ("id")
 )
 ;
