@@ -5,6 +5,17 @@ provider "google" {
   region      = "us-west4"
 }
 
+#Create VM instancrs
+module "compute" {
+  source = "./compute"
+}
+
+#Create sql instances
+module "sql" {
+  source = "./sql"
+}
+
+
 #terraform init
 #terraform validate
 #terraform plan
