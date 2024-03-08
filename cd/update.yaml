@@ -1,0 +1,32 @@
+---
+- hosts: all
+  gather_facts: yes
+  become: yes
+
+  tasks:
+  - name: Оновлення пакетів безпеки
+    apt: 
+      pkg: "*"
+      security: yes
+      state: latest
+      #exclude: java
+      lock_timeout: 90
+
+  - name: Перевірка зміни версії ядра
+    shell: LAST_KERNEL=$(cat /home/ash/kernelversion.txt); CURRENT_KERNEL=$(uname -r); if [ $LAST_KERNEL != $CURRENT_KERNEL ]; then echo 'reboot'; else 'no'; fi
+    register: reboot_hint
+
+  - name: Запис нової версії ядра
+    shell: rpm -q --last kernel | awk 'NR==1{sub(/kernel-/,""); print $1}'>/home/ash/kernelversion.txt
+
+  - name: Upgrade all packages
+    apt:
+      pkg: '*'
+    state: latest
+  
+  - name: Intall package
+    apt:
+      pkg:
+      - mc
+      - nano
+    state: present
