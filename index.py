@@ -1,28 +1,22 @@
-from flask import Flask, render_template, request, redirect, url_for, session,g,app
+from flask import Flask, render_template, request, redirect, url_for, session,g
 import psycopg2
 import os
-from datetime import datetime,timedelta
+from datetime import datetime
 
 app = Flask(__name__,static_url_path="/static")
 
 #значення використовується для захисту від зміни даних сесії користувача з боку клієнта
 app.secret_key = os.urandom(24) 
 
-#час сесії
-@app.before_request
-def make_session_permanent():
-    session.permanent = True
-    app.permanent_session_lifetime = timedelta(minutes=10)
-
 #Конект до бази та використання flask об'єкта G. він викор. для зберігання глоб. змінних протягом одного запиту. + безпека
 def connect_to_db():
     if 'db_connection' not in g:
         g.db_connection = psycopg2.connect(
-            dbname="db",
-            user="root",
-            password="root",
-            host="192.168.0.165",
-            port="5435"
+            dbname="",
+            user="",
+            password="",
+            host="",
+            port=""
         )
     return g.db_connection
 
@@ -63,32 +57,13 @@ def updateInfo():
             country = request.form['country']
             state = request.form['state']
         # Виконуємо запит UPDATE для оновлення інформації користувача
-            if lastname is not None and firstname is not None:
-                cur.execute("UPDATE tbl_users SET lastname = %s, firstname = %s WHERE id = %s",
-                    (lastname, firstname,user_id))
-                
-            if phone is not None:
-                cur.execute("UPDATE tbl_users SET phone = %s WHERE id = %s",
-                    (phone, user_id))   
-
-            if address is not None:
-                cur.execute("UPDATE tbl_users SET address = %s WHERE id = %s",
-                    (address, user_id)) 
-
-            if education is not None:
-                cur.execute("UPDATE tbl_users SET education  = %s WHERE id = %s",
-                    (education, user_id)) 
-              
-            if country is not None and state is not None:
-                cur.execute("UPDATE tbl_users SET country  = %s, state = %s WHERE id = %s",
-                    (country,state, user_id))           
-            
+            cur.execute("UPDATE tbl_users SET lastname = %s, firstname = %s, phone = %s, address = %s, education = %s, country = %s, state = %s WHERE id = %s",
+                    (lastname, firstname, phone, address, education, country, state, user_id))
             conn.commit()
             cur.close()
-            conn.close()              
+            conn.close()
             return redirect(url_for('home'))
     return render_template('login.html', error='You must be logged in to update your information.')
-
 
 @app.route('/delete', methods=['GET', 'POST'])
 def deleteInfo():
@@ -104,7 +79,6 @@ def deleteInfo():
         return redirect(url_for('logout'))
     else:
         return render_template('login.html', error='You must be logged in to delete your information.')
-
 
 #директорія для логіну
 @app.route('/login', methods=['GET', 'POST'])
@@ -126,6 +100,7 @@ def login():
                 return redirect(url_for('home'))
             else:
                 return render_template('login.html', error='Invalid username or password')
+
         return render_template('login.html')
     else:
         return redirect(url_for('home'))
@@ -143,7 +118,6 @@ def register():
             pwd = request.form['password']
 
             cur = conn.cursor()
-            #Перевірка на існування логіна в БД
             cur.execute("SELECT username FROM tbl_users WHERE username = %s", (username,))
             user = cur.fetchone()
             cur.close()
@@ -159,31 +133,59 @@ def register():
     else:
         return render_template('home.html')
 
+#Отримання нотаток
+def get_notes():
+    conn = connect_to_db()  # Підключення до БД
+    cur = conn.cursor()
+    user_id = session['id']
+    cur.execute("SELECT id,title,description FROM tbl_notes WHERE user_id= %s", (user_id,))
+    notes = cur.fetchall()
+    cur.close()
+    conn.close()
+    return notes
+#Вивід нотаток на сторінку notes
+@app.route('/notes',methods=['GET','POST'])
+def notes():
+    username = session.get('username')
+    if 'username' not in session:
+        
+        return redirect(url_for('login'))  # Перенаправлення на сторінку входу, якщо користувач не увійшов у систему
+    else:
+        notes = get_notes()  # Виклик функції для отримання нотаток з БД
+        return render_template('notes.html', notes=notes, username=username)
+# Маршрут для видалення нотатки
+@app.route('/delete_note/<int:note_id>', methods=['POST'])
+def delete_note(note_id):
+    print("Deleting note with ID:", note_id)
+    # Отримати ідентифікатор нотатки, яку потрібно видалити
+    conn = connect_to_db()
+    cur = conn.cursor()
+    cur.execute("DELETE FROM tbl_notes WHERE id = %s", (note_id,))
+    conn.commit()
+    cur.close()
+    conn.close()
+    
+    # Після видалення перенаправити користувача на сторінку з нотатками
+    return redirect(url_for('notes'))
 
-# @app.route('/restore', methods=['GET', 'POST'])
-# def restoreAccount():
-#     if 'username' not in session:
-#         if request.method == 'POST':
-#             username = request.form['username']
-#             pwd = request.form['password']
-#             conn = connect_to_db()
-#             cur = conn.cursor()
+# Маршрут для додавання нотатки
+@app.route('/add_note', methods=['POST'])
+def add_note():
+    if 'username' not in session:
+        return redirect(url_for('login'))  # Перенаправлення на сторінку входу, якщо користувач не увійшов у систему
+    user_id = session['id']
+    note_text = request.form['note_text']  # Отримання тексту нотатки з форми
+    note_title = request.form['note_title']# Отримання тексту нотатки з форми
 
-#             cur.execute("UPDATE tbl_users SET is_deleted = 0 WHERE username = %s and password = %s", (username, pwd))
-#             conn.commit()
-
-#             if cur.rowcount > 0:
-#                 return redirect(url_for('login'))
-#             else:
-#                 return render_template('restore.html', error='Failed to restore account.')
-#             cur.close()
-#             conn.close()
-#         return redirect(url_for('logout'))  # Перенаправлення на сторінку виходу
-#     else:
-#         return render_template('login.html', error='You must be logged in to restore your account.')
-
-
-
+    conn = connect_to_db()
+    cur = conn.cursor()
+    cur.execute("INSERT INTO tbl_notes (user_id,title,description) VALUES (%s, %s, %s)", (user_id,note_text,note_title))
+    conn.commit()
+    cur.close()
+    conn.close()
+    
+    # Після додавання перенаправити користувача на сторінку з нотатками
+    return redirect(url_for('notes'))
 
 #завершення сесії
 @app.route('/logout')
@@ -192,10 +194,8 @@ def logout():
     return redirect(url_for('login'))
 
 
-@app.errorhandler(404)
-def page_not_found(e):
-    return render_template('404.html'), 404
+
 
 
 if __name__ == '__main__':
-    app.run(debug=True, host="0.0.0.0", port=int(os.environ.get("PORT", 8080)))
+    app.run(debug=True)

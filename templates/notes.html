@@ -1,0 +1,33 @@
+<link rel="stylesheet" type="text/css" href="/static/css/stylesnotes.css">
+{% if username %}
+<h1>List</h1>
+<div class="paper">
+	<div class="lines">
+		<div contenteditable>
+			<strong>List</strong>
+			{% for note in notes %}
+
+            <li>{{ note[1] }}</li>
+				<ul> 
+					<li>{{ note[2] }}  
+                        <form action="/delete_note/{{ note[0] }}" method="POST">
+						<button  type="submit">Видалити</button>
+					    </form>
+                    </li>
+				</ul>
+
+        	{% endfor %}	
+
+		</div>
+	</div>
+	<div class="holes">
+		<form action="/add_note" method="POST">
+			<input id="enter-task" type="text" name="note_title" placeholder="Заголовок нотатки">
+			<input id="enter-task" type="text" name="note_text" placeholder="Текст нотатки">
+			<button type="submit" class="btn btn-dark">Додати</button>
+		</form>
+	</div>
+</div>
+{% else %}
+    <p>Перейдіть на сторінку входу <a href="/login">Сторінка входу</a></p>
+{% endif %}
