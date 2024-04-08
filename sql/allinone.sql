@@ -1,4 +1,26 @@
-CREATE TABLE "tbl_users" (
+-- Dumping structure for таблиця public.tbl_notes
+CREATE TABLE IF NOT EXISTS "tbl_notes" (
+	"id" INTEGER NOT NULL DEFAULT 'nextval(''tbl_notes_id_seq''::regclass)',
+	"user_id" INTEGER NULL DEFAULT NULL,
+	"title" VARCHAR NULL DEFAULT NULL,
+	"description" VARCHAR NULL DEFAULT NULL,
+	PRIMARY KEY ("id")
+);
+
+
+
+-- Dumping structure for таблиця public.tbl_privilege
+CREATE TABLE IF NOT EXISTS "tbl_privilege" (
+	"id" INTEGER NOT NULL DEFAULT 'nextval(''tbl_privilege_id_seq''::regclass)',
+	"type" VARCHAR(20) NULL DEFAULT NULL,
+	"description" VARCHAR(50) NULL DEFAULT NULL,
+	PRIMARY KEY ("id")
+);
+
+
+
+-- Dumping structure for таблиця public.tbl_users
+CREATE TABLE IF NOT EXISTS "tbl_users" (
 	"id" INTEGER NOT NULL DEFAULT 'nextval(''tbl_users_id_seq''::regclass)',
 	"username" VARCHAR(20) NULL DEFAULT NULL,
 	"email" VARCHAR(50) NULL DEFAULT NULL,
@@ -12,39 +34,6 @@ CREATE TABLE "tbl_users" (
 	"lastname" VARCHAR(40) NULL DEFAULT NULL,
 	"firstname" VARCHAR(40) NULL DEFAULT NULL,
 	"is_deleted" INTEGER NULL DEFAULT NULL,
+	"id_privilege" INTEGER NULL DEFAULT NULL,
 	PRIMARY KEY ("id")
-)
-;
-COMMENT ON COLUMN "tbl_users"."id" IS '';
-COMMENT ON COLUMN "tbl_users"."username" IS '';
-COMMENT ON COLUMN "tbl_users"."email" IS '';
-COMMENT ON COLUMN "tbl_users"."join_date" IS '';
-COMMENT ON COLUMN "tbl_users"."password" IS '';
-COMMENT ON COLUMN "tbl_users"."address" IS '';
-COMMENT ON COLUMN "tbl_users"."education" IS '';
-COMMENT ON COLUMN "tbl_users"."country" IS '';
-COMMENT ON COLUMN "tbl_users"."state" IS '';
-COMMENT ON COLUMN "tbl_users"."phone" IS '';
-COMMENT ON COLUMN "tbl_users"."lastname" IS '';
-COMMENT ON COLUMN "tbl_users"."firstname" IS '';
-
-
-
-INSERT INTO "tbl_users" ("id", "username", "email", "join_date", "password", "address", "education", "country", "state", "phone", "lastname", "firstname") VALUES
-	(3, 'test3', NULL, NULL, 'test', NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-	(4, 'test', NULL, '2024-02-26', 'test', NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-	(5, 'test2', NULL, NULL, 'test2', 'шевченка', '', 'Україна', 'область', '0971111111', 'first', 'last'),
-	(1, 'work', '@gmail.com', '2024-02-26', 'test', 'шевченка', '', 'Україна', 'область', '0971111111', 'first', 'last');
-/*!40000 ALTER TABLE "tbl_users" ENABLE KEYS */;
-
-
-
-CREATE TABLE tbl_privilege (
-    id SERIAL PRIMARY KEY,
-    type VARCHAR(20),
-    description VARCHAR(50)
 );
-INSERT INTO "public"."tbl_privilege" ("type", "description") VALUES ('користувач', 'звичайна роль');
-SELECT "id", "type", "description" FROM "public"."tbl_privilege" WHERE  "id"=nextval('tbl_privilege_id_seq'::regclass);
-INSERT INTO "public"."tbl_privilege" ("type", "description") VALUES ('адміністратор', 'розширена роль');
-SELECT "id", "type", "description" FROM "public"."tbl_privilege" WHERE  "id"=nextval('tbl_privilege_id_seq'::regclass);
