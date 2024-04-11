@@ -1,12 +1,18 @@
-from flask import Flask, render_template, request, redirect, url_for, session,g
+from flask import Flask, render_template, request, redirect, url_for, session,g,app
 import psycopg2
 import os
-from datetime import datetime
+from datetime import datetime,timedelta
 
 app = Flask(__name__,static_url_path="/static")
 
 #значення використовується для захисту від зміни даних сесії користувача з боку клієнта
 app.secret_key = os.urandom(24) 
+
+#час сесії
+@app.before_request
+def make_session_permanent():
+    session.permanent = True
+    app.permanent_session_lifetime = timedelta(minutes=10)
 
 #Конект до бази та використання flask об'єкта G. він викор. для зберігання глоб. змінних протягом одного запиту. + безпека
 def connect_to_db():
@@ -187,15 +193,39 @@ def add_note():
     # Після додавання перенаправити користувача на сторінку з нотатками
     return redirect(url_for('notes'))
 
+# @app.route('/restore', methods=['GET', 'POST'])
+# def restoreAccount():
+#     if 'username' not in session:
+#         if request.method == 'POST':
+#             username = request.form['username']
+#             pwd = request.form['password']
+#             conn = connect_to_db()
+#             cur = conn.cursor()
+
+#             cur.execute("UPDATE tbl_users SET is_deleted = 0 WHERE username = %s and password = %s", (username, pwd))
+#             conn.commit()
+
+#             if cur.rowcount > 0:
+#                 return redirect(url_for('login'))
+#             else:
+#                 return render_template('restore.html', error='Failed to restore account.')
+#             cur.close()
+#             conn.close()
+#         return redirect(url_for('logout'))  # Перенаправлення на сторінку виходу
+#     else:
+#         return render_template('login.html', error='You must be logged in to restore your account.')
+
 #завершення сесії
 @app.route('/logout')
 def logout():
     session.pop('username', None)
     return redirect(url_for('login'))
 
-
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('404.html'), 404
 
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, host="0.0.0.0", port=int(os.environ.get("PORT", 8080)))
